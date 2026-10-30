@@ -36,8 +36,8 @@ export default function Home() {
   const hero = getForest(1)!;
   return (
     <>
-      {/* Hero */}
-      <section className="relative isolate flex min-h-[min(calc(100svh-4rem),52rem)] items-center overflow-hidden bg-forest-950 text-white">
+      {/* Hero: stops ~7rem short of the screen bottom so the next section peeks in, hinting at the scroll. */}
+      <section className="relative isolate flex min-h-[min(calc(100svh-11rem),46rem)] items-center overflow-hidden bg-forest-950 text-white">
         <ForestImage forest={hero} className="absolute inset-0 -z-10" eager zoom alt="" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-t from-forest-950 via-forest-950/55 to-forest-950/20" />
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-forest-950/80 via-transparent to-transparent" />

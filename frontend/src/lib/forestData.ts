@@ -83,7 +83,7 @@ export const FORESTS: ForestType[] = [
     accent: "#6f8f3a",
     scene: "conifer",
     localImage: "/forests/lodgepole-pine.jpg",
-    wikiTitles: ["Pinus_contorta"],
+    wikiTitles: ["South_Central_Rockies_forests", "Lodgepole_pine"],
   },
   {
     id: 3,

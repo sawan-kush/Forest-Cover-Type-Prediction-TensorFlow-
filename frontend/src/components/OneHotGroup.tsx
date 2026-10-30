@@ -6,7 +6,7 @@ interface Props {
   features: FeatureInfo[];
 }
 
-/** One-of-N selector. Wilderness area (4 options) uses radio cards, soil type (40) a dropdown. */
+/** One-of-N selector. Wilderness area (4 options) uses radio cards; soil (40 options) a dropdown grouped by soil family. */
 export default function OneHotGroup({ group, features }: Props) {
   const { register } = useFormContext();
   const name = `oh_${group.id}`;
@@ -30,15 +30,33 @@ export default function OneHotGroup({ group, features }: Props) {
     );
   }
 
+  // Group the options under their category heading (first-appearance order), if categories are provided.
+  const categories = new Map<string, FeatureInfo[]>();
+  for (const f of features) {
+    const key = f.category ?? "";
+    categories.set(key, [...(categories.get(key) ?? []), f]);
+  }
+  const grouped = !(categories.size === 1 && categories.has(""));
+
   return (
-    <div className="max-w-md">
+    <div className="max-w-3xl">
       <label htmlFor={name} className="mb-1.5 block text-sm font-semibold">{group.title}</label>
       <select id={name} className="input" {...register(name)}>
-        {features.map((f) => (
-          <option key={f.name} value={f.name}>{f.label}</option>
-        ))}
+        {grouped
+          ? [...categories.entries()].map(([category, items]) => (
+              <optgroup key={category} label={category}>
+                {items.map((f) => (
+                  <option key={f.name} value={f.name}>{f.label}</option>
+                ))}
+              </optgroup>
+            ))
+          : features.map((f) => (
+              <option key={f.name} value={f.name}>{f.label}</option>
+            ))}
       </select>
-      <p className="mt-1.5 text-xs text-sage-500">Choose the one soil type that best matches your site.</p>
+      <p className="mt-1.5 text-xs text-sage-500">
+        Choose the soil that best matches your site. Names follow the US Forest Service soil survey used to train the model.
+      </p>
     </div>
   );
 }

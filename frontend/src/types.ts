@@ -5,6 +5,8 @@ export interface FeatureInfo {
   kind: FeatureKind;
   group: string;
   label: string;
+  /** Optional group heading (used to organise the soil dropdown). */
+  category?: string;
   description: string;
   unit?: string;
   default: number;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ForestType } from "../lib/forestData";
 import ForestScene from "./ForestScene";
 
@@ -42,40 +42,57 @@ interface Props {
 
 /** Photograph for a forest type with graceful fallbacks: local file, Wikipedia photo, then an illustrated scene. */
 export default function ForestImage({ forest, alt, className = "", eager = false, zoom = false }: Props) {
-  const [sources, setSources] = useState<string[]>([forest.localImage]);
-  const [index, setIndex] = useState(0);
-  const [loaded, setLoaded] = useState(false);
+  // Extra (Wikipedia) photo URLs, remembered together with the forest they belong to.
+  const [extra, setExtra] = useState<{ id: number; urls: string[] }>({ id: -1, urls: [] });
+  // How many sources have failed for the current forest.
+  const [failed, setFailed] = useState<{ id: number; n: number }>({ id: forest.id, n: 0 });
+  // The exact URL that has finished loading. "Loaded" is derived from this (never reset in an effect),
+  // so an image that finishes loading before React's effects run (e.g. a cached photo) is not missed.
+  const [loadedSrc, setLoadedSrc] = useState<string | null>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  const sources = [forest.localImage, ...(extra.id === forest.id ? extra.urls : [])];
+  const index = failed.id === forest.id ? failed.n : 0;
+  const src: string | undefined = sources[index];
+  const loaded = src !== undefined && loadedSrc === src;
 
   useEffect(() => {
     let off = false;
-    setSources([forest.localImage]);
-    setIndex(0);
-    setLoaded(false);
-    lookupPhotos(forest).then((w) => {
-      if (!off) setSources([forest.localImage, ...w]);
+    lookupPhotos(forest).then((urls) => {
+      if (!off) setExtra({ id: forest.id, urls });
     });
     return () => {
       off = true;
     };
   }, [forest]);
 
-  const src = sources[index];
+  // A cached image can already be complete when it mounts, before any onLoad handler can fire.
+  useEffect(() => {
+    const el = imgRef.current;
+    if (src && el && el.complete && el.naturalWidth > 0) setLoadedSrc(src);
+  }, [src]);
+
+  // Only add `relative` when the caller hasn't positioned the wrapper itself.
+  // Otherwise `relative` overrides `absolute inset-0` (Tailwind emits it later in the CSS),
+  // which collapses the wrapper to zero height and hides the photo.
+  const positioned = /(^|\s)(absolute|fixed|sticky|relative)(\s|$)/.test(className);
 
   return (
-    <div className={`relative overflow-hidden bg-forest-900 ${className}`}>
+    <div className={`${positioned ? "" : "relative"} overflow-hidden bg-forest-900 ${className}`}>
       <ForestScene forest={forest} />
       {src && (
         <img
           key={src}
+          ref={imgRef}
           src={src}
           alt={alt ?? `${forest.name} forest`}
           loading={eager ? "eager" : "lazy"}
+          decoding="async"
           referrerPolicy="no-referrer"
-          onLoad={() => setLoaded(true)}
+          onLoad={() => setLoadedSrc(src)}
           onError={() => {
             if (index > 0) console.warn(`[ForestSphere] could not load photo for ${forest.name}:`, src);
-            setLoaded(false);
-            setIndex((i) => i + 1);
+            setFailed({ id: forest.id, n: index + 1 });
           }}
           className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${loaded ? "opacity-100" : "opacity-0"} ${
             zoom && loaded ? "animate-slowZoom" : ""

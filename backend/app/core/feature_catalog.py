@@ -31,7 +31,7 @@ GROUPS = [
     {"id": "wilderness", "title": "Wilderness Area", "input_type": "one_hot",
      "description": "Choose the one wilderness area the site belongs to."},
     {"id": "soil", "title": "Soil Type", "input_type": "one_hot",
-     "description": "Choose the one soil type of the site."},
+     "description": "Choose the soil that best matches the site. Soils are grouped by family."},
     {"id": "other", "title": "Other Features", "input_type": "number",
      "description": "Features not covered by the standard dataset description."},
 ]
@@ -77,6 +77,66 @@ _WILDERNESS_NAMES = {1: "Rawah", 2: "Neota", 3: "Comanche Peak", 4: "Cache la Po
 _WILDERNESS_RE = re.compile(r"^Wilderness_Area(\d+)$")
 _SOIL_RE = re.compile(r"^Soil_Type(\d+)$")
 
+# --------------------------------------------------------------------------- soil types
+# Official USFS Ecological Landtype Unit descriptions for the 40 soil codes of the Covertype
+# dataset (Blackard & Dean, Colorado State University). The model still receives the code
+# (Soil_Type1..Soil_Type40); these names only change what the person sees.
+_SOIL_NAMES = {
+    1: "Cathedral family - Rock outcrop complex, extremely stony",
+    2: "Vanet - Ratake families complex, very stony",
+    3: "Haploborolis - Rock outcrop complex, rubbly",
+    4: "Ratake family - Rock outcrop complex, rubbly",
+    5: "Vanet family - Rock outcrop complex, rubbly",
+    6: "Vanet - Wetmore families - Rock outcrop complex, stony",
+    7: "Gothic family",
+    8: "Supervisor - Limber families complex",
+    9: "Troutville family, very stony",
+    10: "Bullwark - Catamount families - Rock outcrop complex, rubbly",
+    11: "Bullwark - Catamount families - Rock land complex, rubbly",
+    12: "Legault family - Rock land complex, stony",
+    13: "Catamount family - Rock land - Bullwark family complex, rubbly",
+    14: "Pachic Argiborolis - Aquolis complex",
+    15: "Unspecified in the USFS soil survey",
+    16: "Cryaquolis - Cryoborolis complex",
+    17: "Gateview family - Cryaquolis complex",
+    18: "Rogert family, very stony",
+    19: "Typic Cryaquolis - Borohemists complex",
+    20: "Typic Cryaquepts - Typic Cryaquolls complex",
+    21: "Typic Cryaquolls - Leighcan family, till substratum complex",
+    22: "Leighcan family, till substratum, extremely bouldery",
+    23: "Leighcan family, till substratum - Typic Cryaquolls complex",
+    24: "Leighcan family, extremely stony",
+    25: "Leighcan family, warm, extremely stony",
+    26: "Granile - Catamount families complex, very stony",
+    27: "Leighcan family, warm - Rock outcrop complex, extremely stony",
+    28: "Leighcan family - Rock outcrop complex, extremely stony",
+    29: "Como - Legault families complex, extremely stony",
+    30: "Como family - Rock land - Legault family complex, extremely stony",
+    31: "Leighcan - Catamount families complex, extremely stony",
+    32: "Catamount family - Rock outcrop - Leighcan family complex, extremely stony",
+    33: "Leighcan - Catamount families - Rock outcrop complex, extremely stony",
+    34: "Cryorthents - Rock land complex, extremely stony",
+    35: "Cryumbrepts - Rock outcrop - Cryaquepts complex",
+    36: "Bross family - Rock land - Cryumbrepts complex, extremely stony",
+    37: "Rock outcrop - Cryumbrepts - Cryorthents complex, extremely stony",
+    38: "Leighcan - Moran families - Cryaquolls complex, extremely stony",
+    39: "Moran family - Cryorthents - Leighcan family complex, extremely stony",
+    40: "Moran family - Cryorthents - Rock land complex, extremely stony",
+}
+
+# Friendly groups used to organise the dropdown. This grouping is this app's own (based on the
+# soil names above), not an official classification.
+_SOIL_CATEGORY_RANGES = [
+    ("Rocky and rubbly outcrop soils", [1, 2, 3, 4, 5, 6, 10, 11, 12, 13]),
+    ("Other mountain soil families", [7, 8, 9, 15, 18]),
+    ("Wet and boggy soils", [14, 16, 17, 19, 20]),
+    ("Leighcan family soils", [21, 22, 23, 24, 25, 27, 28, 31, 32, 33]),
+    ("Como, Granile and Legault soils", [26, 29, 30]),
+    ("Cold, rocky high-mountain soils", [34, 35, 36, 37, 38, 39, 40]),
+]
+SOIL_CATEGORIES = {n: cat for cat, nums in _SOIL_CATEGORY_RANGES for n in nums}
+assert sorted(SOIL_CATEGORIES) == list(range(1, 41)) == sorted(_SOIL_NAMES)
+
 DEFAULT_WILDERNESS = "Wilderness_Area1"
 DEFAULT_SOIL = "Soil_Type29"
 
@@ -107,8 +167,12 @@ def describe_feature(name: str, is_continuous: bool) -> dict:
     m = _SOIL_RE.match(name)
     if m:
         n = int(m.group(1))
-        return {"name": name, "kind": "binary", "group": "soil", "label": f"Soil Type {n}",
-                "description": f"Soil type {n} (USFS Ecological Landtype Unit code).",
+        official = _SOIL_NAMES.get(n)
+        return {"name": name, "kind": "binary", "group": "soil",
+                "label": official or f"Soil Type {n}",
+                "category": SOIL_CATEGORIES.get(n, "Other soils"),
+                "description": (f"{official}. USFS Ecological Landtype Unit (dataset soil code {n})."
+                                if official else f"Soil type {n} (USFS Ecological Landtype Unit code)."),
                 "default": 1 if name == DEFAULT_SOIL else 0}
 
     # Unknown feature name: stay generic, never guess semantics.

@@ -1,0 +1,13 @@
+# Tested with Python 3.12 (Python 3.11 is also supported by these versions).
+# The scaler was saved with scikit-learn 1.6.1 -> keep this exact version.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic-settings>=2.4
+numpy>=1.26,<2.2
+pandas>=2.2
+joblib>=1.4
+scikit-learn==1.6.1
+# CPU-only TensorFlow keeps the deploy image smaller. Use `tensorflow==2.19.0` if you prefer.
+tensorflow-cpu==2.19.0
+# The model was saved with Keras 3.13.2; loading was tested with Keras 3.15.1.
+keras>=3.13,<4

@@ -52,3 +52,12 @@ export interface FieldError {
   field: string;
   message: string;
 }
+
+/** One line of the "your site" summary shown on the results page. */
+export interface SiteItem {
+  key: string;
+  group: string;
+  label: string;
+  value: number | string;
+  unit?: string;
+}

@@ -14,10 +14,14 @@
 }
 
 @layer components {
-  .card { @apply rounded-xl border border-sage-200 bg-white shadow-card; }
-  .btn { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-60; }
-  .btn-primary { @apply btn bg-forest-800 text-white hover:bg-forest-700; }
-  .btn-secondary { @apply btn border border-sage-300 bg-white text-forest-800 hover:bg-sage-100; }
-  .input { @apply w-full rounded-lg border border-sage-300 bg-white px-3 py-2 text-sm text-forest-900 placeholder:text-sage-500 focus:border-forest-600; }
+  .wrap { @apply mx-auto w-full max-w-[1760px] px-5 sm:px-8 lg:px-14 2xl:px-24; }
+  .card { @apply rounded-2xl border border-sage-200 bg-white shadow-card; }
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-60; }
+  .btn-primary { @apply btn bg-forest-800 text-white hover:-translate-y-0.5 hover:bg-forest-700 hover:shadow-lift; }
+  .btn-secondary { @apply btn border border-forest-800/30 bg-white text-forest-800 hover:border-forest-800 hover:bg-forest-50; }
+  .btn-light { @apply btn bg-white text-forest-900 hover:-translate-y-0.5 hover:bg-forest-50 hover:shadow-lift; }
+  .btn-ghost-light { @apply btn border border-white/50 text-white backdrop-blur hover:bg-white/15; }
+  .eyebrow { @apply text-xs font-semibold uppercase tracking-[0.22em] text-forest-600; }
+  .input { @apply w-full rounded-xl border border-sage-300 bg-white px-3.5 py-2.5 text-sm text-forest-900 placeholder:text-sage-500 transition-colors focus:border-forest-600; }
   .input-error { @apply border-red-500; }
 }

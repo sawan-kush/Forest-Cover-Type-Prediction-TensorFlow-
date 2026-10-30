@@ -1,26 +1,32 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
-import type { PredictionResult } from "../types";
+import type { PredictionResult, SiteItem } from "../types";
+
+interface Report {
+  result: PredictionResult;
+  site: SiteItem[];
+}
 
 interface Ctx {
   result: PredictionResult | null;
-  setResult: (r: PredictionResult | null) => void;
+  site: SiteItem[];
+  setReport: (r: Report | null) => void;
 }
 
 const ResultContext = createContext<Ctx | null>(null);
-const KEY = "fct:lastResult";
+const KEY = "forestsphere:lastReport";
 
-function readStored(): PredictionResult | null {
+function readStored(): Report | null {
   try {
     const raw = sessionStorage.getItem(KEY);
-    return raw ? (JSON.parse(raw) as PredictionResult) : null;
+    return raw ? (JSON.parse(raw) as Report) : null;
   } catch {
     return null;
   }
 }
 
 export function ResultProvider({ children }: { children: ReactNode }) {
-  const [result, setState] = useState<PredictionResult | null>(readStored);
-  const setResult = (r: PredictionResult | null) => {
+  const [report, setState] = useState<Report | null>(readStored);
+  const setReport = (r: Report | null) => {
     setState(r);
     try {
       if (r) sessionStorage.setItem(KEY, JSON.stringify(r));
@@ -29,7 +35,11 @@ export function ResultProvider({ children }: { children: ReactNode }) {
       /* storage unavailable */
     }
   };
-  return <ResultContext.Provider value={{ result, setResult }}>{children}</ResultContext.Provider>;
+  return (
+    <ResultContext.Provider value={{ result: report?.result ?? null, site: report?.site ?? [], setReport }}>
+      {children}
+    </ResultContext.Provider>
+  );
 }
 
 export function useResult(): Ctx {

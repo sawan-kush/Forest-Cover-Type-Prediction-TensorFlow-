@@ -38,6 +38,8 @@ An end-to-end machine learning project that predicts forest cover type from cart
 
 ## Project Overview
 
+Deployed Project URL:https://forestsphere.vercel.app
+
 Forest ecosystems are shaped by geographical and environmental factors such as elevation, slope, soil composition, hydrology, sunlight exposure, and distance from roads and fire ignition points.
 
 This project builds a multiclass classifier that predicts the forest cover type of a land cell from these cartographic characteristics. It covers the full workflow: data inspection, preprocessing, feature scaling, neural network design, hyperparameter experimentation, evaluation, and a reusable prediction pipeline.

@@ -1,0 +1,22 @@
+# Python junk
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+
+# Secrets / local config (pass settings via docker-compose environment instead)
+.env
+.env.*
+!.env.example
+
+# Not needed at runtime
+tests/
+pytest.ini
+requirements-dev.txt
+.python-version
+
+# Docker files themselves
+Dockerfile
+.dockerignore

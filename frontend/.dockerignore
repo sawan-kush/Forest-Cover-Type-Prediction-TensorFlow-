@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.vite/
+*.tsbuildinfo
+
+# Local env files must not leak into the build; the API URL is set via a build arg.
+.env
+.env.*
+!.env.example
+
+# Deployment config for Vercel, not used here
+vercel.json
+
+Dockerfile
+.dockerignore
